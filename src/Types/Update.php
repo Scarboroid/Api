@@ -149,19 +149,12 @@ class Update extends BaseType implements TypeInterface
     }
 
     /**
-     * @return Message
+     * @param Message $message
      */
-    public function getEditedMessage()
+    public function setEditedMessage($message)
     {
-        return $this->editedMessage;
-    }
-
-    /**
-     * @param Message $editedMessage
-     */
-    public function setEditedMessage($editedMessage)
-    {
-        $this->editedMessage = $editedMessage;
+        $message->setEdited(true);
+        $this->message = $message;
     }
 
     /**
@@ -181,19 +174,12 @@ class Update extends BaseType implements TypeInterface
     }
 
     /**
-     * @return Message
+     * @param Message $channelPost
      */
-    public function getEditedChannelPost()
+    public function setEditedChannelPost($channelPost)
     {
-        return $this->editedChannelPost;
-    }
-
-    /**
-     * @param Message $editedChannelPost
-     */
-    public function setEditedChannelPost($editedChannelPost)
-    {
-        $this->editedChannelPost = $editedChannelPost;
+        $channelPost->setEdited(true);
+        $this->channelPost = $channelPost;
     }
 
     /**

@@ -2,6 +2,7 @@
 namespace TelegramBot\Api\Types;
 
 use TelegramBot\Api\BaseType;
+use TelegramBot\Api\BotApiContainer;
 use TelegramBot\Api\InvalidArgumentException;
 use TelegramBot\Api\TypeInterface;
 use TelegramBot\Api\Types\Payments\Invoice;
@@ -319,6 +320,13 @@ class Message extends BaseType implements TypeInterface
      * @var string
      */
     protected $connectedWebsite;
+
+    /**
+     * Is edited or new message.
+     *
+     * @var boolean
+     */
+    protected $isEdited = false;
 
     /**
      * @return string
@@ -916,5 +924,99 @@ class Message extends BaseType implements TypeInterface
     public function setConnectedWebsite($connectedWebsite)
     {
         $this->connectedWebsite = $connectedWebsite;
+    }
+
+    public function setEdited(bool $edited)
+    {
+        $this->isEdited = $edited;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isEdited()
+    {
+        return $this->isEdited;
+    }
+
+    public function forward(int $chatId, bool $disableNotifiaction = false)
+    {
+        return BotApiContainer::getInstance()->forwardMessage(
+            $chatId,
+            $this->getChat()->getId(),
+            $this->getMessageId(),
+            $disableNotifiaction
+        );
+    }
+
+    public function replyMessage(
+        string $text,
+        $parseMode = null,
+        bool $disablePreview = false,
+        $replyMarkup = null,
+        bool $disableNotification = false
+    ) {
+        return BotApiContainer::getInstance()->sendMessage(
+            $this->getChat()->getId(),
+            $text,
+            $parseMode,
+            $disablePreview,
+            $this->getMessageId(),
+            $replyMarkup,
+            $disableNotification
+        );
+    }
+
+    public function editText(
+        string $text,
+        $parseMode = null,
+        $disablePreview = false,
+        $replyMarkup = null,
+        $inlineMessageId = null
+    ) {
+        return BotApiContainer::getInstance()->editMessageText(
+            $this->getChat()->getId(),
+            $this->getMessageId(),
+            $text,
+            $parseMode,
+            $disablePreview,
+            $replyMarkup,
+            $inlineMessageId
+        );
+    }
+
+    public function editCaption(
+        $caption = null,
+        $parseMode = null,
+        $replyMarkup = null,
+        $inlineMessageId = null
+    ) {
+        return BotApiContainer::getInstance()->editMessageCaption(
+            $this->getChat()->getId(),
+            $this->getMessageId(),
+            $caption,
+            $replyMarkup,
+            $inlineMessageId
+        );
+    }
+
+    public function editReplyMarkup(
+        $replyMarkup = null,
+        $inlineMessageId = null
+    ) {
+        return BotApiContainer::getInstance()->editMessageReplyMarkup(
+            $this->getChat()->getId(),
+            $this->getMessageId(),
+            $replyMarkup,
+            $inlineMessageId
+        );
+    }
+
+    public function delete()
+    {
+        return BotApiContainer::getInstance()->deleteMessage(
+            $this->getChat()->getId(),
+            $this->getMessageId()
+        );
     }
 }
