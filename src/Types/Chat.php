@@ -3,6 +3,7 @@
 namespace TelegramBot\Api\Types;
 
 use TelegramBot\Api\BaseType;
+use TelegramBot\Api\BotApiContainer;
 use TelegramBot\Api\InvalidArgumentException;
 use TelegramBot\Api\TypeInterface;
 
@@ -334,5 +335,157 @@ class Chat extends BaseType implements TypeInterface
     public function setCanSetStickerSet($canSetStickerSet)
     {
         $this->canSetStickerSet = $canSetStickerSet;
+    }
+
+    public function sendMessage(
+        $text,
+        $parseMode = null,
+        $disablePreview = false,
+        $replyToMessageId = null,
+        $replyMarkup = null,
+        $disableNotification = false
+    ) {
+        return BotApiContainer::getInstance()->sendMessage(
+            $this->getId(),
+            $text,
+            $parseMode,
+            $disablePreview,
+            $replyToMessageId,
+            $replyMarkup,
+            $disableNotification
+        );
+    }
+
+    public function sendPhoto(
+        $photo,
+        $caption = null,
+        $replyToMessageId = null,
+        $replyMarkup = null,
+        $disableNotification = false,
+        $parseMode = null
+    ) {
+        return BotApiContainer::getInstance()->sendPhoto(
+            $this->getId(),
+            $photo,
+            $caption,
+            $replyToMessageId,
+            $replyMarkup,
+            $disableNotification,
+            $parseMode
+        );
+    }
+
+    public function sendAudio(
+        $audio,
+        $duration = null,
+        $performer = null,
+        $title = null,
+        $replyToMessageId = null,
+        $replyMarkup = null,
+        $disableNotification = false,
+        $parseMode = null
+    ) {
+        return BotApiContainer::getInstance()->sendAudio(
+            $this->getId(),
+            $audio,
+            $duration,
+            $performer,
+            $title,
+            $replyToMessageId,
+            $replyMarkup,
+            $disableNotification,
+            $parseMode
+        );
+    }
+
+    public function sendVideo(
+        $video,
+        $duration = null,
+        $caption = null,
+        $replyToMessageId = null,
+        $replyMarkup = null,
+        $disableNotification = false,
+        $supportsStreaming = false,
+        $parseMode = null
+    ) {
+        return BotApiContainer::getInstance()->sendVideo(
+            $this->getId(),
+            $video,
+            $duration,
+            $caption,
+            $replyToMessageId,
+            $replyMarkup,
+            $disableNotification,
+            $supportsStreaming,
+            $parseMode
+        );
+    }
+
+    public function sendVideoNote(
+        $videoNote,
+        $duration = null,
+        $length = null,
+        $replyToMessageId = null,
+        $replyMarkup = null,
+        $disableNotification = false
+    ) {
+        return BotApiContainer::getInstance()->sendVideoNote(
+            $this->getId(),
+            $videoNote,
+            $duration,
+            $length,
+            $replyToMessageId,
+            $replyMarkup,
+            $disableNotification
+        );
+    }
+
+    public function sendAction(string $action)
+    {
+        return BotApiContainer::getInstance()->sendChatAction(
+            $this->getId(),
+            $action
+        );
+    }
+
+    public function sendContact(
+        $phoneNumber,
+        $firstName,
+        $lastName = null,
+        $replyToMessageId = null,
+        $replyMarkup = null,
+        $disableNotification = false
+    ) {
+        return BotApiContainer::getInstance()->sendContact(
+            $this->getId(),
+            $phoneNumber,
+            $firstName,
+            $lastName,
+            $replyToMessageId,
+            $replyMarkup,
+            $disableNotification
+        );
+    }
+
+    public function leave()
+    {
+        return BotApiContainer::getInstance()->leaveChat($this->getId());
+    }
+
+    public function kickMember(int $userId, $untilDate = null)
+    {
+        return BotApiContainer::getInstance()->kickChatMember(
+            $this->getId(),
+            $userId,
+            $untilDate
+        );
+    }
+
+    public function unbanMember(int $userId)
+    {
+        return BotApiContainer::getInstance()->unbanChatMember(
+            $this->getId(),
+            $userId
+        );
     }
 }
