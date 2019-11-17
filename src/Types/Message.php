@@ -939,6 +939,9 @@ class Message extends BaseType implements TypeInterface
         return $this->isEdited;
     }
 
+    /**
+     * @return Message
+     */
     public function forward($chatId, bool $disableNotifiaction = false)
     {
         return BotApiContainer::getInstance()->forwardMessage(
