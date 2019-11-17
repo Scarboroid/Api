@@ -3,6 +3,7 @@
 namespace TelegramBot\Api\Types;
 
 use TelegramBot\Api\BaseType;
+use TelegramBot\Api\BotApiContainer;
 use TelegramBot\Api\InvalidArgumentException;
 use TelegramBot\Api\TypeInterface;
 
@@ -177,5 +178,25 @@ class User extends BaseType implements TypeInterface
     public function setIsBot($isBot)
     {
         $this->isBot = $isBot;
+    }
+
+    public function sendMessage(
+        $text,
+        $parseMode = null,
+        $disablePreview = false,
+        $replyToMessageId = null,
+        $replyMarkup = null,
+        $disableNotification = false
+    )
+    {
+        BotApiContainer::getInstance()->sendMessage(
+            $this->getId(),
+            $text,
+            $replyToMessageId,
+            $parseMode,
+            $replyMarkup,
+            $disablePreview,
+            $disableNotification
+        );
     }
 }
