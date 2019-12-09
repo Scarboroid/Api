@@ -333,7 +333,7 @@ class BotApi
             'parse_mode' => $parseMode,
             'disable_web_page_preview' => $disablePreview,
             'reply_to_message_id' => (int)$replyToMessageId,
-            'reply_markup' => is_null($replyMarkup) ? $replyMarkup : $replyMarkup->toJson(),
+            'reply_markup' => !$replyMarkup ? null : $replyMarkup->toJson(),
             'disable_notification' => (bool)$disableNotification,
         ]));
     }
@@ -368,7 +368,7 @@ class BotApi
             'first_name' => $firstName,
             'last_name' => $lastName,
             'reply_to_message_id' => $replyToMessageId,
-            'reply_markup' => is_null($replyMarkup) ? $replyMarkup : $replyMarkup->toJson(),
+            'reply_markup' => !$replyMarkup ? null : $replyMarkup->toJson(),
             'disable_notification' => (bool)$disableNotification,
         ]));
     }
@@ -512,7 +512,7 @@ class BotApi
             'longitude'            => $longitude,
             'live_period'          => $livePeriod,
             'reply_to_message_id'  => $replyToMessageId,
-            'reply_markup'         => is_null($replyMarkup) ? $replyMarkup : $replyMarkup->toJson(),
+            'reply_markup'         => !$replyMarkup ? null : $replyMarkup->toJson(),
             'disable_notification' => (bool)$disableNotification,
         ]));
     }
@@ -543,7 +543,7 @@ class BotApi
             'inline_message_id' => $inlineMessageId,
             'latitude'          => $latitude,
             'longitude'         => $longitude,
-            'reply_markup'      => is_null($replyMarkup) ? $replyMarkup : $replyMarkup->toJson(),
+            'reply_markup'      => !$replyMarkup ? null : $replyMarkup->toJson(),
         ]));
     }
 
@@ -568,7 +568,7 @@ class BotApi
             'chat_id'           => $chatId,
             'message_id'        => $messageId,
             'inline_message_id' => $inlineMessageId,
-            'reply_markup'      => is_null($replyMarkup) ? $replyMarkup : $replyMarkup->toJson(),
+            'reply_markup'      => !$replyMarkup ? null : $replyMarkup->toJson(),
         ]));
     }
 
@@ -608,7 +608,7 @@ class BotApi
             'address' => $address,
             'foursquare_id' => $foursquareId,
             'reply_to_message_id' => $replyToMessageId,
-            'reply_markup' => is_null($replyMarkup) ? $replyMarkup : $replyMarkup->toJson(),
+            'reply_markup' => !$replyMarkup ? null : $replyMarkup->toJson(),
             'disable_notification' => (bool)$disableNotification,
         ]));
     }
@@ -638,7 +638,7 @@ class BotApi
             'chat_id' => $chatId,
             'sticker' => $sticker,
             'reply_to_message_id' => $replyToMessageId,
-            'reply_markup' => is_null($replyMarkup) ? $replyMarkup : $replyMarkup->toJson(),
+            'reply_markup' => !$replyMarkup ? null : $replyMarkup->toJson(),
             'disable_notification' => (bool)$disableNotification,
         ]));
     }
@@ -680,7 +680,7 @@ class BotApi
             'duration' => $duration,
             'caption' => $caption,
             'reply_to_message_id' => $replyToMessageId,
-            'reply_markup' => is_null($replyMarkup) ? $replyMarkup : $replyMarkup->toJson(),
+            'reply_markup' => !$replyMarkup ? null : $replyMarkup->toJson(),
             'disable_notification' => (bool)$disableNotification,
             'supports_streaming' => (bool)$supportsStreaming,
             'parse_mode' => $parseMode
@@ -722,7 +722,7 @@ class BotApi
             'voice' => $voice,
             'duration' => $duration,
             'reply_to_message_id' => $replyToMessageId,
-            'reply_markup' => is_null($replyMarkup) ? $replyMarkup : $replyMarkup->toJson(),
+            'reply_markup' => !$replyMarkup ? null : $replyMarkup->toJson(),
             'disable_notification' => (bool)$disableNotification,
             'parse_mode' => $parseMode
         ]));
@@ -799,7 +799,7 @@ class BotApi
             'performer' => $performer,
             'title' => $title,
             'reply_to_message_id' => $replyToMessageId,
-            'reply_markup' => is_null($replyMarkup) ? $replyMarkup : $replyMarkup->toJson(),
+            'reply_markup' => !$replyMarkup ? null : $replyMarkup->toJson(),
             'disable_notification' => (bool)$disableNotification,
             'parse_mode' => $parseMode
         ]));
@@ -835,7 +835,7 @@ class BotApi
             'photo' => $photo,
             'caption' => $caption,
             'reply_to_message_id' => $replyToMessageId,
-            'reply_markup' => is_null($replyMarkup) ? $replyMarkup : $replyMarkup->toJson(),
+            'reply_markup' => !$replyMarkup ? null : $replyMarkup->toJson(),
             'disable_notification' => (bool)$disableNotification,
             'parse_mode' => $parseMode
         ]));
@@ -872,7 +872,7 @@ class BotApi
             'document' => $document,
             'caption' => $caption,
             'reply_to_message_id' => $replyToMessageId,
-            'reply_markup' => is_null($replyMarkup) ? $replyMarkup : $replyMarkup->toJson(),
+            'reply_markup' => !$replyMarkup ? null : $replyMarkup->toJson(),
             'disable_notification' => (bool)$disableNotification,
             'parse_mode' => $parseMode
         ]));
@@ -1052,7 +1052,7 @@ class BotApi
             'inline_message_id' => $inlineMessageId,
             'parse_mode' => $parseMode,
             'disable_web_page_preview' => $disablePreview,
-            'reply_markup' => is_null($replyMarkup) ? $replyMarkup : $replyMarkup->toJson(),
+            'reply_markup' => !$replyMarkup ? null : $replyMarkup->toJson(),
         ]));
     }
 
@@ -1082,7 +1082,7 @@ class BotApi
             'message_id' => $messageId,
             'inline_message_id' => $inlineMessageId,
             'caption' => $caption,
-            'reply_markup' => is_null($replyMarkup) ? $replyMarkup : $replyMarkup->toJson(),
+            'reply_markup' => !$replyMarkup ? null : $replyMarkup->toJson(),
         ]));
     }
 
@@ -1107,7 +1107,7 @@ class BotApi
             'chat_id' => $chatId,
             'message_id' => $messageId,
             'inline_message_id' => $inlineMessageId,
-            'reply_markup' => is_null($replyMarkup) ? $replyMarkup : $replyMarkup->toJson(),
+            'reply_markup' => !$replyMarkup ? null : $replyMarkup->toJson(),
         ]));
     }
 
@@ -1264,7 +1264,7 @@ class BotApi
             'need_email' => $needEmail,
             'need_shipping_address' => $needShippingAddress,
             'reply_to_message_id' => $replyToMessageId,
-            'reply_markup' => is_null($replyMarkup) ? $replyMarkup : $replyMarkup->toJson(),
+            'reply_markup' => !$replyMarkup ? null : $replyMarkup->toJson(),
             'disable_notification' => (bool)$disableNotification,
             'provider_data' => $providerData,
             'send_phone_number_to_provider' => (bool)$sendPhoneNumberToProvider,
@@ -1642,7 +1642,7 @@ class BotApi
             'duration' => $duration,
             'length' => $length,
             'reply_to_message_id' => $replyToMessageId,
-            'reply_markup' => is_null($replyMarkup) ? $replyMarkup : $replyMarkup->toJson(),
+            'reply_markup' => !$replyMarkup ? null : $replyMarkup->toJson(),
             'disable_notification' => (bool)$disableNotification
         ]));
     }
