@@ -329,6 +329,13 @@ class Message extends BaseType implements TypeInterface
     protected $isEdited = false;
 
     /**
+     * Is deleted.
+     *
+     * @var boolean
+     */
+    protected $isDeleted = false;
+
+    /**
      * @return string
      */
     public function getCaption()
@@ -1017,9 +1024,16 @@ class Message extends BaseType implements TypeInterface
 
     public function delete()
     {
-        return BotApiContainer::getInstance()->deleteMessage(
+        $this->isDeleted = BotApiContainer::getInstance()->deleteMessage(
             $this->getChat()->getId(),
             $this->getMessageId()
         );
+
+        return $this->isDeleted;
+    }
+
+    public function isDeleted()
+    {
+        return $this->isDeleted;
     }
 }
