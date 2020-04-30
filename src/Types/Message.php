@@ -59,7 +59,8 @@ class Message extends BaseType implements TypeInterface
         'successful_payment' => SuccessfulPayment::class,
         'forward_signature' => true,
         'author_signature' => true,
-        'connected_website' => true
+        'connected_website' => true,
+        'media_group_id' => true,
     ];
 
     /**
@@ -342,6 +343,13 @@ class Message extends BaseType implements TypeInterface
      * @var boolean
      */
     protected $isDeleted = false;
+
+    /**
+     * Media group id.
+     *
+     * @var string
+     */
+    protected $mediaGroupId;
 
     /**
      * @return string
@@ -1059,5 +1067,15 @@ class Message extends BaseType implements TypeInterface
     public function isDeleted()
     {
         return $this->isDeleted;
+    }
+
+    public function getMediaGroupId()
+    {
+        return $this->mediaGroupId;
+    }
+
+    public function setMediaGroupId($mediaGroupId)
+    {
+        $this->mediaGroupId = $mediaGroupId;
     }
 }
