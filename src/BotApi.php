@@ -10,7 +10,9 @@ use TelegramBot\Api\Types\ChatMember;
 use TelegramBot\Api\Types\File;
 use TelegramBot\Api\Types\Inline\QueryResult\AbstractInlineQueryResult;
 use TelegramBot\Api\Types\InputMedia\ArrayOfInputMedia;
+use TelegramBot\Api\Types\InputMedia\InputMedia;
 use TelegramBot\Api\Types\Message;
+use TelegramBot\Api\Types\Poll;
 use TelegramBot\Api\Types\Update;
 use TelegramBot\Api\Types\User;
 use TelegramBot\Api\Types\UserProfilePhotos;
@@ -437,6 +439,19 @@ class BotApi
         return $this->call('setWebhook', ['url' => $url, 'certificate' => $certificate]);
     }
 
+
+    /**
+     * Use this method to clear webhook and use getUpdates again!
+     *
+     * @return mixed
+     *
+     * @throws \TelegramBot\Api\Exception
+     */
+    public function deleteWebhook()
+    {
+        return $this->call('deleteWebhook');
+    }
+
     /**
      * A simple method for testing your bot's auth token.Requires no parameters.
      * Returns basic information about the bot in form of a User object.
@@ -683,6 +698,47 @@ class BotApi
             'reply_markup' => !$replyMarkup ? null : $replyMarkup->toJson(),
             'disable_notification' => (bool)$disableNotification,
             'supports_streaming' => (bool)$supportsStreaming,
+            'parse_mode' => $parseMode
+        ]));
+    }
+
+    /**
+     * Use this method to send animation files (GIF or H.264/MPEG-4 AVC video without sound),
+     * On success, the sent Message is returned.
+     * Bots can currently send animation files of up to 50 MB in size, this limit may be changed in the future.
+     *
+     * @param int|string $chatId chat_id or @channel_name
+     * @param \CURLFile|string $animation
+     * @param int|null $duration
+     * @param string|null $caption
+     * @param int|null $replyToMessageId
+     * @param Types\ReplyKeyboardMarkup|Types\ReplyKeyboardHide|Types\ForceReply|
+     *        Types\ReplyKeyboardRemove|null $replyMarkup
+     * @param bool $disableNotification
+     * @param string|null $parseMode
+     *
+     * @return \TelegramBot\Api\Types\Message
+     * @throws \TelegramBot\Api\InvalidArgumentException
+     * @throws \TelegramBot\Api\Exception
+     */
+    public function sendAnimation(
+        $chatId,
+        $animation,
+        $duration = null,
+        $caption = null,
+        $replyToMessageId = null,
+        $replyMarkup = null,
+        $disableNotification = false,
+        $parseMode = null
+    ) {
+        return Message::fromResponse($this->call('sendAnimation', [
+            'chat_id' => $chatId,
+            'animation' => $animation,
+            'duration' => $duration,
+            'caption' => $caption,
+            'reply_to_message_id' => $replyToMessageId,
+            'reply_markup' => is_null($replyMarkup) ? $replyMarkup : $replyMarkup->toJson(),
+            'disable_notification' => (bool)$disableNotification,
             'parse_mode' => $parseMode
         ]));
     }
@@ -1083,6 +1139,40 @@ class BotApi
             'inline_message_id' => $inlineMessageId,
             'caption' => $caption,
             'reply_markup' => !$replyMarkup ? null : $replyMarkup->toJson(),
+        ]));
+    }
+
+    /**
+     * Use this method to edit animation, audio, document, photo, or video messages.
+     * If a message is a part of a message album, then it can be edited only to a photo or a video.
+     * Otherwise, message type can be changed arbitrarily.
+     * When inline message is edited, new file can't be uploaded.
+     * Use previously uploaded file via its file_id or specify a URL.
+     * On success, if the edited message was sent by the bot, the edited Message is returned, otherwise True is returned
+     *
+     * @param $chatId
+     * @param $messageId
+     * @param InputMedia $media
+     * @param null $inlineMessageId
+     * @param null $replyMarkup
+     * @return bool|Message
+     * @throws Exception
+     * @throws HttpException
+     * @throws InvalidJsonException
+     */
+    public function editMessageMedia(
+        $chatId,
+        $messageId,
+        InputMedia $media,
+        $inlineMessageId = null,
+        $replyMarkup = null
+    ) {
+        return Message::fromResponse($this->call('editMessageMedia', [
+            'chat_id' => $chatId,
+            'message_id' => $messageId,
+            'inline_message_id' => $inlineMessageId,
+            'media' => $media->toJson(),
+            'reply_markup' => is_null($replyMarkup) ? $replyMarkup : $replyMarkup->toJson(),
         ]));
     }
 
@@ -1680,7 +1770,7 @@ class BotApi
      *
      * @return BotApi
      */
-    public function setProxy($proxyString = '')
+    public function setProxy($proxyString = '', $socks5 = false)
     {
         if (empty($proxyString)) {
             $this->proxySettings = [];
@@ -1691,7 +1781,119 @@ class BotApi
             CURLOPT_PROXY => $proxyString,
             CURLOPT_HTTPPROXYTUNNEL => true,
         ];
+
+        if ($socks5) {
+            $this->proxySettings[CURLOPT_PROXYTYPE] = CURLPROXY_SOCKS5;
+        }
         return $this;
+    }
+
+
+    /**
+     * Use this method to send a native poll. A native poll can't be sent to a private chat.
+     * On success, the sent \TelegramBot\Api\Types\Message is returned.
+     *
+     * @param $chatId string|int Unique identifier for the target chat or username of the target channel
+     *                (in the format @channelusername)
+     * @param string $question Poll question, 1-255 characters
+     * @param array $options A JSON-serialized list of answer options, 2-10 strings 1-100 characters each
+     * @param bool $isAnonymous True, if the poll needs to be anonymous, defaults to True
+     * @param null $type Poll type, “quiz” or “regular”, defaults to “regular”
+     * @param bool $allowsMultipleAnswers True, if the poll allows multiple answers,
+     *                          ignored for polls in quiz mode, defaults to False
+     * @param null $correctOptionId 0-based identifier of the correct answer option, required for polls in quiz mode
+     * @param bool $isClosed Pass True, if the poll needs to be immediately closed. This can be useful for poll preview.
+     * @param bool $disableNotification Sends the message silently. Users will receive a notification with no sound.
+     * @param int|null $replyToMessageId If the message is a reply, ID of the original message
+     * @param null $replyMarkup Additional interface options. A JSON-serialized object for an inline keyboard,
+     *                          custom reply keyboard, instructions to remove reply
+     *                          keyboard or to force a reply from the user.
+     * @return \TelegramBot\Api\Types\Message
+     * @throws Exception
+     * @throws HttpException
+     * @throws InvalidJsonException
+     */
+    public function sendPoll(
+        $chatId,
+        $question,
+        $options,
+        $isAnonymous = false,
+        $type = null,
+        $allowsMultipleAnswers = false,
+        $correctOptionId = null,
+        $isClosed = false,
+        $disableNotification = false,
+        $replyToMessageId = null,
+        $replyMarkup = null
+    ) {
+        return Message::fromResponse($this->call('sendPoll', [
+            'chat_id' => $chatId,
+            'question' => $question,
+            'options' => json_encode($options),
+            'is_anonymous' => (bool) $isAnonymous,
+            'type' => (string) $type,
+            'allows_multiple_answers' => (bool) $allowsMultipleAnswers,
+            'correct_option_id' => (int) $correctOptionId,
+            'is_closed' => (bool) $isClosed,
+            'disable_notification' => (bool) $disableNotification,
+            'reply_to_message_id' => (int) $replyToMessageId,
+            'reply_markup' => $replyMarkup === null ? $replyMarkup : $replyMarkup->toJson(),
+        ]));
+    }
+
+    /**
+     * Use this method to send a dice, which will have a random value from 1 to 6.
+     * On success, the sent Message is returned. (Yes, we're aware of the “proper” singular of die.
+     * But it's awkward, and we decided to help it change. One dice at a time!)
+     *
+     * @param $chatId string|int Unique identifier for the target chat or username of the target channel
+     *                (in the format @channelusername)
+     * @param bool $disableNotification Sends the message silently. Users will receive a notification with no sound.
+     * @param null $replyToMessageId If the message is a reply, ID of the original message
+     * @param null $replyMarkup Additional interface options. A JSON-serialized object for an inline keyboard,
+     *                          custom reply keyboard, instructions to remove reply
+     *                          keyboard or to force a reply from the user.
+     * @return bool|Message
+     * @throws Exception
+     * @throws HttpException
+     * @throws InvalidJsonException
+     */
+    public function sendDice(
+        $chatId,
+        $disableNotification = false,
+        $replyToMessageId = null,
+        $replyMarkup = null
+    ) {
+        return Message::fromResponse($this->call('sendDice', [
+            'chat_id' => $chatId,
+            'disable_notification' => (bool) $disableNotification,
+            'reply_to_message_id' => (int) $replyToMessageId,
+            'reply_markup' => $replyMarkup === null ? $replyMarkup : $replyMarkup->toJson(),
+        ]));
+    }
+
+    /**
+     * Use this method to stop a poll which was sent by the bot.
+     * On success, the stopped \TelegramBot\Api\Types\Poll with the final results is returned.
+     *
+     * @param int|string $chatId
+     * @param int $messageId
+     * @param Types\ReplyKeyboardMarkup|Types\ReplyKeyboardHide|Types\ForceReply|
+     *        Types\ReplyKeyboardRemove|null $replyMarkup
+     * @return Poll
+     * @throws \TelegramBot\Api\InvalidArgumentException
+     * @throws \TelegramBot\Api\Exception
+     */
+    public function stopPoll(
+        $chatId,
+        $messageId,
+        $replyMarkup = null
+    ) {
+        return Poll::fromResponse($this->call('stopPoll', [
+            'chat_id' => $chatId,
+            'message_id' => $messageId,
+            'reply_markup' => is_null($replyMarkup) ? $replyMarkup : $replyMarkup->toJson(),
+        ]));
     }
 
     /**

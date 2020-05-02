@@ -5,6 +5,7 @@ use TelegramBot\Api\BaseType;
 use TelegramBot\Api\BotApiContainer;
 use TelegramBot\Api\InvalidArgumentException;
 use TelegramBot\Api\TypeInterface;
+use TelegramBot\Api\Types\Inline\InlineKeyboardMarkup;
 use TelegramBot\Api\Types\Payments\Invoice;
 use TelegramBot\Api\Types\Payments\SuccessfulPayment;
 
@@ -28,13 +29,21 @@ class Message extends BaseType implements TypeInterface
         'date' => true,
         'chat' => Chat::class,
         'forward_from' => User::class,
+        'forward_from_chat' => Chat::class,
+        'forward_from_message_id' => true,
         'forward_date' => true,
+        'forward_signature' => true,
+        'forward_sender_name' => true,
         'reply_to_message' => Message::class,
+        'edit_date' => true,
+        'media_group_id' => true,
+        'author_signature' => true,
         'text' => true,
         'entities' => ArrayOfMessageEntity::class,
         'caption_entities' => ArrayOfMessageEntity::class,
         'audio' => Audio::class,
         'document' => Document::class,
+        'animation' => Animation::class,
         'photo' => ArrayOfPhotoSize::class,
         'sticker' => Sticker::class,
         'video' => Video::class,
@@ -43,8 +52,9 @@ class Message extends BaseType implements TypeInterface
         'contact' => Contact::class,
         'location' => Location::class,
         'venue' => Venue::class,
-        'new_chat_member' => User::class,
-        'new_chat_members' => ArrayOfUsers::class,
+        'poll' => Poll::class,
+        'dice' => Dice::class,
+        'new_chat_members' => ArrayOfUser::class,
         'left_chat_member' => User::class,
         'new_chat_title' => true,
         'new_chat_photo' => ArrayOfPhotoSize::class,
@@ -57,10 +67,8 @@ class Message extends BaseType implements TypeInterface
         'pinned_message' => Message::class,
         'invoice' => Invoice::class,
         'successful_payment' => SuccessfulPayment::class,
-        'forward_signature' => true,
-        'author_signature' => true,
         'connected_website' => true,
-        'media_group_id' => true,
+        'reply_markup' => InlineKeyboardMarkup::class,
     ];
 
     /**
@@ -99,6 +107,37 @@ class Message extends BaseType implements TypeInterface
     protected $forwardFrom;
 
     /**
+     * Optional. For messages forwarded from channels, information about
+     * the original channel
+     *
+     * @var \TelegramBot\Api\Types\Chat
+     */
+    protected $forwardFromChat;
+
+    /**
+     * Optional. For messages forwarded from channels, identifier of
+     * the original message in the channel
+     *
+     * @var int
+     */
+    protected $forwardFromMessageId;
+
+    /**
+     * Optional. For messages forwarded from channels, signature of the post author if present
+     *
+     * @var string
+     */
+    protected $forwardSignature;
+
+    /**
+     * Optional. Sender's name for messages forwarded from users who disallow adding a link to their account
+     * in forwarded messages
+     *
+     * @var string
+     */
+    protected $forwardSenderName;
+
+    /**
      * Optional. For forwarded messages, date the original message was sent in Unix time
      *
      * @var int
@@ -112,6 +151,28 @@ class Message extends BaseType implements TypeInterface
      * @var \TelegramBot\Api\Types\Message
      */
     protected $replyToMessage;
+
+    /**
+     * Optional. Date the message was last edited in Unix time
+     *
+     * @var int
+     */
+    protected $editDate;
+
+    /**
+     * Optional. The unique identifier of a media message group
+     * this message belongs to
+     *
+     * @var int
+     */
+    protected $mediaGroupId;
+
+    /**
+     * Optional. Signature of the post author for messages in channels
+     *
+     * @var string
+     */
+    protected $authorSignature;
 
     /**
      * Optional. For text messages, the actual UTF-8 text of the message
@@ -129,6 +190,14 @@ class Message extends BaseType implements TypeInterface
     protected $entities;
 
     /**
+     * Optional. For messages with a caption, special entities like usernames,
+     * URLs, bot commands, etc. that appear in the caption
+     *
+     * @var ArrayOfMessageEntity
+     */
+    protected $captionEntities;
+
+    /**
      * Optional. Message is an audio file, information about the file
      *
      * @var \TelegramBot\Api\Types\Audio
@@ -141,6 +210,13 @@ class Message extends BaseType implements TypeInterface
      * @var \TelegramBot\Api\Types\Document
      */
     protected $document;
+
+    /**
+     * Optional. Message is a animation, information about the animation
+     *
+     * @var \TelegramBot\Api\Types\Animation
+     */
+    protected $animation;
 
     /**
      * Optional. Message is a photo, available sizes of the photo
@@ -172,6 +248,13 @@ class Message extends BaseType implements TypeInterface
     protected $voice;
 
     /**
+     * Optional. Text description of the video (usually empty)
+     *
+     * @var string
+     */
+    protected $caption;
+
+    /**
      * Optional. Message is a shared contact, information about the contact
      *
      * @var \TelegramBot\Api\Types\Contact
@@ -193,16 +276,25 @@ class Message extends BaseType implements TypeInterface
     protected $venue;
 
     /**
-     * Optional. A new member was added to the group, information about them (this member may be bot itself)
+     * Optional. Message is a native poll, information about the poll
      *
-     * @var \TelegramBot\Api\Types\User
+     * @var \TelegramBot\Api\Types\Poll
      */
-    protected $newChatMember;
+    protected $poll;
 
     /**
-     * Optional. A new members was added to the group, information about them
+     * Optional. Message is a dice with random value from 1 to 6
      *
-     * @var \TelegramBot\Api\Types\ArrayOfUsers
+     * @var \TelegramBot\Api\Types\Dice
+     */
+    protected $dice;
+
+    /**
+     * Optional. New members that were added to the group or supergroup and information about them
+     * (the bot itself may be one of these members)
+     * array of \TelegramBot\Api\Types\User
+     *
+     * @var array
      */
     protected $newChatMembers;
 
@@ -240,14 +332,6 @@ class Message extends BaseType implements TypeInterface
      * @var bool
      */
     protected $groupChatCreated;
-
-    /**
-     * Optional. Text description of the video (usually empty)
-     *
-     * @var string
-     */
-    protected $caption;
-
 
     /**
      * Optional. Service message: the supergroup has been created
@@ -302,33 +386,18 @@ class Message extends BaseType implements TypeInterface
     protected $successfulPayment;
 
     /**
-     * Optional. For messages forwarded from channels, signature of the post author if present
-     *
-     * @var string
-     */
-    protected $forwardSignature;
-
-    /**
-     * Optional. Signature of the post author for messages in channels
-     *
-     * @var string
-     */
-    protected $authorSignature;
-
-    /**
-     * Optional. For messages with a caption, special entities like usernames,
-     * URLs, bot commands, etc. that appear in the caption
-     *
-     * @var ArrayOfMessageEntity
-     */
-    protected $captionEntities;
-
-    /**
      * Optional. The domain name of the website on which the user has logged in.
      *
      * @var string
      */
     protected $connectedWebsite;
+
+    /**
+     * Optional. Inline keyboard attached to the message. login_url buttons are represented as ordinary url buttons.
+     *
+     * @var InlineKeyboardMarkup
+     */
+    protected $replyMarkup;
 
     /**
      * Is edited or new message.
@@ -345,234 +414,7 @@ class Message extends BaseType implements TypeInterface
     protected $isDeleted = false;
 
     /**
-     * Media group id.
-     *
-     * @var string
-     */
-    protected $mediaGroupId;
-
-    /**
      * @return string
-     */
-    public function getCaption()
-    {
-        return $this->caption;
-    }
-
-    /**
-     * @param string $caption
-     */
-    public function setCaption($caption)
-    {
-        $this->caption = $caption;
-    }
-
-    /**
-     * @return Audio
-     */
-    public function getAudio()
-    {
-        return $this->audio;
-    }
-
-    /**
-     * @param Audio $audio
-     */
-    public function setAudio(Audio $audio)
-    {
-        $this->audio = $audio;
-    }
-
-    /**
-     * @return Chat
-     */
-    public function getChat()
-    {
-        return $this->chat;
-    }
-
-    /**
-     * @param Chat $chat
-     */
-    public function setChat(Chat $chat)
-    {
-        $this->chat = $chat;
-    }
-
-    /**
-     * @return Contact
-     */
-    public function getContact()
-    {
-        return $this->contact;
-    }
-
-    /**
-     * @param Contact $contact
-     */
-    public function setContact(Contact $contact)
-    {
-        $this->contact = $contact;
-    }
-
-    /**
-     * @return int
-     */
-    public function getDate()
-    {
-        return $this->date;
-    }
-
-    /**
-     * @param int $date
-     *
-     * @throws InvalidArgumentException
-     */
-    public function setDate($date)
-    {
-        if (is_integer($date)) {
-            $this->date = $date;
-        } else {
-            throw new InvalidArgumentException();
-        }
-    }
-
-    /**
-     * @return boolean
-     */
-    public function isDeleteChatPhoto()
-    {
-        return $this->deleteChatPhoto;
-    }
-
-    /**
-     * @param boolean $deleteChatPhoto
-     */
-    public function setDeleteChatPhoto($deleteChatPhoto)
-    {
-        $this->deleteChatPhoto = (bool)$deleteChatPhoto;
-    }
-
-    /**
-     * @return Document
-     */
-    public function getDocument()
-    {
-        return $this->document;
-    }
-
-    /**
-     * @param Document $document
-     */
-    public function setDocument($document)
-    {
-        $this->document = $document;
-    }
-
-    /**
-     * @return int
-     */
-    public function getForwardDate()
-    {
-        return $this->forwardDate;
-    }
-
-    /**
-     * @param int $forwardDate
-     *
-     * @throws InvalidArgumentException
-     */
-    public function setForwardDate($forwardDate)
-    {
-        if (is_integer($forwardDate)) {
-            $this->forwardDate = $forwardDate;
-        } else {
-            throw new InvalidArgumentException();
-        }
-    }
-
-    /**
-     * @return User
-     */
-    public function getForwardFrom()
-    {
-        return $this->forwardFrom;
-    }
-
-    /**
-     * @param User $forwardFrom
-     */
-    public function setForwardFrom(User $forwardFrom)
-    {
-        $this->forwardFrom = $forwardFrom;
-    }
-
-    /**
-     * @return boolean
-     */
-    public function isGroupChatCreated()
-    {
-        return $this->groupChatCreated;
-    }
-
-    /**
-     * @param boolean $groupChatCreated
-     */
-    public function setGroupChatCreated($groupChatCreated)
-    {
-        $this->groupChatCreated = (bool)$groupChatCreated;
-    }
-
-    /**
-     * @return User
-     */
-    public function getLeftChatMember()
-    {
-        return $this->leftChatMember;
-    }
-
-    /**
-     * @param User $leftChatMember
-     */
-    public function setLeftChatMember($leftChatMember)
-    {
-        $this->leftChatMember = $leftChatMember;
-    }
-
-    /**
-     * @return Location
-     */
-    public function getLocation()
-    {
-        return $this->location;
-    }
-
-    /**
-     * @param Location $location
-     */
-    public function setLocation(Location $location)
-    {
-        $this->location = $location;
-    }
-
-    /**
-     * @return Venue
-     */
-    public function getVenue()
-    {
-        return $this->venue;
-    }
-
-    /**
-     * @param Venue $venue
-     */
-    public function setVenue($venue)
-    {
-        $this->venue = $venue;
-    }
-
-    /**
-     * @return int
      */
     public function getMessageId()
     {
@@ -596,81 +438,157 @@ class Message extends BaseType implements TypeInterface
     /**
      * @return User
      */
-    public function getNewChatMember()
+    public function getFrom()
     {
-        return $this->newChatMember;
+        return $this->from;
     }
 
     /**
-     * @param User $newChatMember
+     * @param User $from
      */
-    public function setNewChatMember($newChatMember)
+    public function setFrom(User $from)
     {
-        $this->newChatMember = $newChatMember;
+        $this->from = $from;
     }
 
     /**
-     * @return ArrayOfUsers
+     * @return Chat
      */
-    public function getNewChatMembers()
+    public function getChat()
     {
-        return $this->newChatMembers;
+        return $this->chat;
     }
 
     /**
-     * @param ArrayOfUsers $newChatMembers
+     * @param Chat $chat
      */
-    public function setNewChatMembers($newChatMembers)
+    public function setChat(Chat $chat)
     {
-        $this->newChatMembers = $newChatMembers;
+        $this->chat = $chat;
     }
 
     /**
-     * @return array
+     * @return int
      */
-    public function getNewChatPhoto()
+    public function getDate()
     {
-        return $this->newChatPhoto;
+        return $this->date;
     }
 
     /**
-     * @param array $newChatPhoto
+     * @param int $date
+     *
+     * @throws InvalidArgumentException
      */
-    public function setNewChatPhoto($newChatPhoto)
+    public function setDate($date)
     {
-        $this->newChatPhoto = $newChatPhoto;
+        if (is_int($date)) {
+            $this->date = $date;
+        } else {
+            throw new InvalidArgumentException();
+        }
+    }
+
+    /**
+     * @return User
+     */
+    public function getForwardFrom()
+    {
+        return $this->forwardFrom;
+    }
+
+    /**
+     * @param User $forwardFrom
+     */
+    public function setForwardFrom(User $forwardFrom)
+    {
+        $this->forwardFrom = $forwardFrom;
+    }
+
+    /**
+     * @return Chat
+     */
+    public function getForwardFromChat()
+    {
+        return $this->forwardFromChat;
+    }
+
+    /**
+     * @param Chat $forwardFromChat
+     */
+    public function setForwardFromChat(Chat $forwardFromChat)
+    {
+        $this->forwardFromChat = $forwardFromChat;
+    }
+
+    /**
+     * @return int
+     */
+    public function getForwardFromMessageId()
+    {
+        return $this->forwardFromMessageId;
+    }
+
+    /**
+     * @param int $forwardFromMessageId
+     */
+    public function setForwardFromMessageId($forwardFromMessageId)
+    {
+        $this->forwardFromMessageId = $forwardFromMessageId;
     }
 
     /**
      * @return string
      */
-    public function getNewChatTitle()
+    public function getForwardSignature()
     {
-        return $this->newChatTitle;
+        return $this->forwardSignature;
     }
 
     /**
-     * @param string $newChatTitle
+     * @param string $forwardSignature
      */
-    public function setNewChatTitle($newChatTitle)
+    public function setForwardSignature($forwardSignature)
     {
-        $this->newChatTitle = $newChatTitle;
+        $this->forwardSignature = $forwardSignature;
     }
 
     /**
-     * @return array
+     * @return string
      */
-    public function getPhoto()
+    public function getForwardSenderName()
     {
-        return $this->photo;
+        return $this->forwardSenderName;
     }
 
     /**
-     * @param array $photo
+     * @param string $forwardSenderName
      */
-    public function setPhoto(array $photo)
+    public function setForwardSenderName($forwardSenderName)
     {
-        $this->photo = $photo;
+        $this->forwardSenderName = $forwardSenderName;
+    }
+
+    /**
+     * @return int
+     */
+    public function getForwardDate()
+    {
+        return $this->forwardDate;
+    }
+
+    /**
+     * @param int $forwardDate
+     *
+     * @throws InvalidArgumentException
+     */
+    public function setForwardDate($forwardDate)
+    {
+        if (is_int($forwardDate)) {
+            $this->forwardDate = $forwardDate;
+        } else {
+            throw new InvalidArgumentException();
+        }
     }
 
     /**
@@ -690,19 +608,57 @@ class Message extends BaseType implements TypeInterface
     }
 
     /**
-     * @return Sticker
+     * @return int
      */
-    public function getSticker()
+    public function getEditDate()
     {
-        return $this->sticker;
+        return $this->editDate;
     }
 
     /**
-     * @param Sticker $sticker
+     * @param int $editDate
+     *
+     * @throws InvalidArgumentException
      */
-    public function setSticker(Sticker $sticker)
+    public function setEditDate($editDate)
     {
-        $this->sticker = $sticker;
+        if (is_int($editDate)) {
+            $this->editDate = $editDate;
+        } else {
+            throw new InvalidArgumentException();
+        }
+    }
+
+    /**
+     * @return int
+     */
+    public function getMediaGroupId()
+    {
+        return $this->mediaGroupId;
+    }
+
+    /**
+     * @param int $mediaGroupId
+     */
+    public function setMediaGroupId($mediaGroupId)
+    {
+        $this->mediaGroupId = $mediaGroupId;
+    }
+
+    /**
+     * @return string
+     */
+    public function getAuthorSignature()
+    {
+        return $this->authorSignature;
+    }
+
+    /**
+     * @param string $authorSignature
+     */
+    public function setAuthorSignature($authorSignature)
+    {
+        $this->authorSignature = $authorSignature;
     }
 
     /**
@@ -738,19 +694,99 @@ class Message extends BaseType implements TypeInterface
     }
 
     /**
-     * @return User
+     * @return ArrayOfMessageEntity
      */
-    public function getFrom()
+    public function getCaptionEntities()
     {
-        return $this->from;
+        return $this->captionEntities;
     }
 
     /**
-     * @param User $from
+     * @param ArrayOfMessageEntity $captionEntities
      */
-    public function setFrom(User $from)
+    public function setCaptionEntities($captionEntities)
     {
-        $this->from = $from;
+        $this->captionEntities = $captionEntities;
+    }
+
+    /**
+     * @return Audio
+     */
+    public function getAudio()
+    {
+        return $this->audio;
+    }
+
+    /**
+     * @param Audio $audio
+     */
+    public function setAudio(Audio $audio)
+    {
+        $this->audio = $audio;
+    }
+
+    /**
+     * @return Document
+     */
+    public function getDocument()
+    {
+        return $this->document;
+    }
+
+    /**
+     * @param Document $document
+     */
+    public function setDocument($document)
+    {
+        $this->document = $document;
+    }
+
+    /**
+     * @return Animation
+     */
+    public function getAnimation()
+    {
+        return $this->animation;
+    }
+
+    /**
+     * @param Animation $animation
+     */
+    public function setAnimation(Animation $animation)
+    {
+        $this->animation = $animation;
+    }
+
+    /**
+     * @return array
+     */
+    public function getPhoto()
+    {
+        return $this->photo;
+    }
+
+    /**
+     * @param array $photo
+     */
+    public function setPhoto(array $photo)
+    {
+        $this->photo = $photo;
+    }
+
+    /**
+     * @return Sticker
+     */
+    public function getSticker()
+    {
+        return $this->sticker;
+    }
+
+    /**
+     * @param Sticker $sticker
+     */
+    public function setSticker(Sticker $sticker)
+    {
+        $this->sticker = $sticker;
     }
 
     /**
@@ -786,11 +822,195 @@ class Message extends BaseType implements TypeInterface
     }
 
     /**
-     * @param boolean $supergroupChatCreated
+     * @return string
      */
-    public function setSupergroupChatCreated($supergroupChatCreated)
+    public function getCaption()
     {
-        $this->supergroupChatCreated = $supergroupChatCreated;
+        return $this->caption;
+    }
+
+    /**
+     * @param string $caption
+     */
+    public function setCaption($caption)
+    {
+        $this->caption = $caption;
+    }
+
+    /**
+     * @return Contact
+     */
+    public function getContact()
+    {
+        return $this->contact;
+    }
+
+    /**
+     * @param Contact $contact
+     */
+    public function setContact(Contact $contact)
+    {
+        $this->contact = $contact;
+    }
+
+    /**
+     * @return Location
+     */
+    public function getLocation()
+    {
+        return $this->location;
+    }
+
+    /**
+     * @param Location $location
+     */
+    public function setLocation(Location $location)
+    {
+        $this->location = $location;
+    }
+
+    /**
+     * @return Venue
+     */
+    public function getVenue()
+    {
+        return $this->venue;
+    }
+
+    /**
+     * @param Venue $venue
+     */
+    public function setVenue($venue)
+    {
+        $this->venue = $venue;
+    }
+
+    /**
+     * @return Poll
+     */
+    public function getPoll()
+    {
+        return $this->poll;
+    }
+
+    /**
+     * @param Poll $poll
+     */
+    public function setPoll($poll)
+    {
+        $this->poll = $poll;
+    }
+
+    /**
+     * @return Dice
+     */
+    public function getDice()
+    {
+        return $this->dice;
+    }
+
+    /**
+     * @param Dice $dice
+     */
+    public function setDice(Dice $dice)
+    {
+        $this->dice = $dice;
+    }
+
+    /**
+     * @return array
+     */
+    public function getNewChatMembers()
+    {
+        return $this->newChatMembers;
+    }
+
+    /**
+     * @param array $newChatMembers
+     */
+    public function setNewChatMembers($newChatMembers)
+    {
+        $this->newChatMembers = $newChatMembers;
+    }
+
+    /**
+     * @return User
+     */
+    public function getLeftChatMember()
+    {
+        return $this->leftChatMember;
+    }
+
+    /**
+     * @param User $leftChatMember
+     */
+    public function setLeftChatMember($leftChatMember)
+    {
+        $this->leftChatMember = $leftChatMember;
+    }
+
+    /**
+     * @return string
+     */
+    public function getNewChatTitle()
+    {
+        return $this->newChatTitle;
+    }
+
+    /**
+     * @param string $newChatTitle
+     */
+    public function setNewChatTitle($newChatTitle)
+    {
+        $this->newChatTitle = $newChatTitle;
+    }
+
+    /**
+     * @return array
+     */
+    public function getNewChatPhoto()
+    {
+        return $this->newChatPhoto;
+    }
+
+    /**
+     * @param array $newChatPhoto
+     */
+    public function setNewChatPhoto($newChatPhoto)
+    {
+        $this->newChatPhoto = $newChatPhoto;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isDeleteChatPhoto()
+    {
+        return $this->deleteChatPhoto;
+    }
+
+    /**
+     * @param boolean $deleteChatPhoto
+     */
+    public function setDeleteChatPhoto($deleteChatPhoto)
+    {
+        $this->deleteChatPhoto = (bool)$deleteChatPhoto;
+    }
+
+    /**
+     * @return boolean
+     */
+    public function isGroupChatCreated()
+    {
+        return $this->groupChatCreated;
+    }
+
+    /**
+     * @param boolean $groupChatCreated
+     */
+    public function setGroupChatCreated($groupChatCreated)
+    {
+        $this->groupChatCreated = (bool)$groupChatCreated;
     }
 
     /**
@@ -802,11 +1022,11 @@ class Message extends BaseType implements TypeInterface
     }
 
     /**
-     * @param boolean $channelChatCreated
+     * @param boolean $supergroupChatCreated
      */
-    public function setChannelChatCreated($channelChatCreated)
+    public function setSupergroupChatCreated($supergroupChatCreated)
     {
-        $this->channelChatCreated = $channelChatCreated;
+        $this->supergroupChatCreated = $supergroupChatCreated;
     }
 
     /**
@@ -815,6 +1035,22 @@ class Message extends BaseType implements TypeInterface
     public function isChannelChatCreated()
     {
         return $this->channelChatCreated;
+    }
+
+    /**
+     * @param boolean $channelChatCreated
+     */
+    public function setChannelChatCreated($channelChatCreated)
+    {
+        $this->channelChatCreated = $channelChatCreated;
+    }
+
+    /**
+     * @return int
+     */
+    public function getMigrateToChatId()
+    {
+        return $this->migrateToChatId;
     }
 
     /**
@@ -828,9 +1064,9 @@ class Message extends BaseType implements TypeInterface
     /**
      * @return int
      */
-    public function getMigrateToChatId()
+    public function getMigrateFromChatId()
     {
-        return $this->migrateToChatId;
+        return $this->migrateFromChatId;
     }
 
     /**
@@ -839,14 +1075,6 @@ class Message extends BaseType implements TypeInterface
     public function setMigrateFromChatId($migrateFromChatId)
     {
         $this->migrateFromChatId = $migrateFromChatId;
-    }
-
-    /**
-     * @return int
-     */
-    public function getMigrateFromChatId()
-    {
-        return $this->migrateFromChatId;
     }
 
     /**
@@ -904,54 +1132,6 @@ class Message extends BaseType implements TypeInterface
     /**
      * @return string
      */
-    public function getForwardSignature()
-    {
-        return $this->forwardSignature;
-    }
-
-    /**
-     * @param string $forwardSignature
-     */
-    public function setForwardSignature($forwardSignature)
-    {
-        $this->forwardSignature = $forwardSignature;
-    }
-
-    /**
-     * @return string
-     */
-    public function getAuthorSignature()
-    {
-        return $this->authorSignature;
-    }
-
-    /**
-     * @param string $authorSignature
-     */
-    public function setAuthorSignature($authorSignature)
-    {
-        $this->authorSignature = $authorSignature;
-    }
-
-    /**
-     * @return ArrayOfMessageEntity
-     */
-    public function getCaptionEntities()
-    {
-        return $this->captionEntities;
-    }
-
-    /**
-     * @param ArrayOfMessageEntity $captionEntities
-     */
-    public function setCaptionEntities($captionEntities)
-    {
-        $this->captionEntities = $captionEntities;
-    }
-
-    /**
-     * @return string
-     */
     public function getConnectedWebsite()
     {
         return $this->connectedWebsite;
@@ -963,6 +1143,22 @@ class Message extends BaseType implements TypeInterface
     public function setConnectedWebsite($connectedWebsite)
     {
         $this->connectedWebsite = $connectedWebsite;
+    }
+
+    /**
+     * @return InlineKeyboardMarkup
+     */
+    public function getReplyMarkup()
+    {
+        return $this->replyMarkup;
+    }
+
+    /**
+     * @param InlineKeyboardMarkup $replyMarkup
+     */
+    public function setReplyMarkup($replyMarkup)
+    {
+        $this->replyMarkup = $replyMarkup;
     }
 
     public function setEdited(bool $edited)
@@ -1067,15 +1263,5 @@ class Message extends BaseType implements TypeInterface
     public function isDeleted()
     {
         return $this->isDeleted;
-    }
-
-    public function getMediaGroupId()
-    {
-        return $this->mediaGroupId;
-    }
-
-    public function setMediaGroupId($mediaGroupId)
-    {
-        $this->mediaGroupId = $mediaGroupId;
     }
 }
