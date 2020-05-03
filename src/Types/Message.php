@@ -11,6 +11,25 @@ use TelegramBot\Api\Types\Payments\SuccessfulPayment;
 
 class Message extends BaseType implements TypeInterface
 {
+    const TYPE_TEXT = 'text';
+    const TYPE_PHOTO = 'photo';
+    const TYPE_VIDEO = 'video';
+    const TYPE_AUDIO = 'audio';
+    const TYPE_DOCUMENT = 'document';
+    const TYPE_ANIMATION = 'animation';
+    const TYPE_STICKER = 'sticker';
+    const TYPE_NEW_CHAT_MEMBER = 'new_chat_member';
+    const TYPE_LEFT_CHAT_MEMBER = 'left_chat_member';
+    const TYPE_POLL = 'poll';
+    const TYPE_VOICE = 'voice';
+    const TYPE_VENUE = 'venue';
+    const TYPE_LOCATION = 'location';
+    const TYPE_INVOICE = 'invoice';
+    const TYPE_NEW_CHAT_PHOTO = 'new_chat_photo';
+    const TYPE_NEW_CHAT_TITLE = 'new_chat_title';
+    const TYPE_PINNED_MESSAGE = 'pinned_message';
+    const TYPE_MIGRATE = 'migrate';
+
     /**
      * {@inheritdoc}
      *
@@ -1264,4 +1283,52 @@ class Message extends BaseType implements TypeInterface
     {
         return $this->isDeleted;
     }
+
+    public function getMessageType()
+    {
+        $messageType = null;
+
+        if (!is_null($this->text)) {
+            $messageType = self::TYPE_TEXT;
+        } elseif ($this->photo) {
+            $messageType = self::TYPE_PHOTO;
+        } elseif ($this->video) {
+            $messageType = self::TYPE_VIDEO;
+        } elseif ($this->audio) {
+            $messageType = self::TYPE_AUDIO;
+        } elseif ($this->document) {
+            $messageType = self::TYPE_DOCUMENT;
+        } elseif ($this->animation) {
+            $messageType = self::TYPE_ANIMATION;
+        } elseif ($this->sticker) {
+            $messageType = self::TYPE_STICKER;
+        } elseif ($this->newChatMembers) {
+            $messageType = self::TYPE_NEW_CHAT_MEMBER;
+        } elseif ($this->leftChatMember) {
+            $messageType = self::TYPE_LEFT_CHAT_MEMBER;
+        } elseif ($this->poll) {
+            $messageType = self::TYPE_POLL;
+        } elseif ($this->voice) {
+            $messageType = self::TYPE_VOICE;
+        } elseif ($this->venue) {
+            $messageType = self::TYPE_VENUE;
+        } elseif ($this->location) {
+            $messageType = self::TYPE_LOCATION;
+        } elseif ($this->invoice) {
+            $messageType = self::TYPE_INVOICE;
+        } elseif ($this->newChatPhoto) {
+            $messageType = self::TYPE_NEW_CHAT_PHOTO;
+        } elseif ($this->newChatTitle) {
+            $messageType = self::TYPE_NEW_CHAT_TITLE;
+        } elseif ($this->pinnedMessage) {
+            $messageType = self::TYPE_PINNED_MESSAGE;
+        } elseif (
+            $this->migrateFromChatId
+            or $this->migrateToChatId
+        ) {
+            $messageType = self::TYPE_MIGRATE;
+        }
+
+        return $messageType;
+     }
 }
